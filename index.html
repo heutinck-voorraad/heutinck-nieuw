@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voorraadlijst Heutinck</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+            background: #f1f8f1; 
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { padding: 10px; max-width: 600px; margin: 0 auto; }
+        header { 
+            background: #2e7d32; 
+            color: white; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 { font-size: 20px; margin-bottom: 5px; }
+        header p { font-size: 12px; opacity: 0.9; margin: 0; }
+        .lijst-datum { 
+            position: absolute; 
+            bottom: 10px; 
+            right: 15px; 
+            font-size: 11px; 
+            opacity: 0.85;
+            font-weight: 600;
+        }
+        .lijst-datum.oud { color: #ffcc80; }
+        
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+        .tab {
+            padding: 10px 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+        }
+        .tab.active { background: #2e7d32; color: white; border-color: #2e7d32; }
+        .tab-settings { flex: 0 0 auto; padding: 10px 14px; font-size: 16px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .upload-section { 
+            background: white; padding: 15px; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px;
+        }
+        .upload-area { border: 2px dashed #2e7d32; border-radius: 8px; padding: 20px; text-align: center; }
+        .btn { 
+            padding: 12px 20px; border: none; border-radius: 6px; font-size: 14px; 
+            font-weight: 600; width: 100%; background: #2e7d32; color: white; cursor: pointer;
+        }
+        .btn:active { background: #1b5e20; }
+        input[type="file"] { display: none; }
+        
+        .search-box { 
+            width: 100%; padding: 12px; font-size: 16px; 
+            border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px;
+        }
+        
+        .products-table { 
+            background: white; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto;
+        }
+        .products-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .products-table th { 
+            background: #2e7d32; color: white; padding: 10px 8px; 
+            text-align: left; font-weight: 600; position: sticky; top: 0;
+        }
+        .products-table td { padding: 8px 8px; border-bottom: 1px solid #eee; }
+        .products-table tr:hover { background: #f1f8f1; }
+        .products-table tr { cursor: pointer; }
+
+        /* Bestelknop in tabel */
+        .btn-bestel {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            margin: 0 auto;
+            transition: transform 0.1s;
+        }
+        .btn-bestel:active { background: #1b5e20; transform: scale(0.88); }
+
+        /* Winkelmand tab */
+        .note-item, .cart-item {
+            background: #f9f9f9; padding: 12px; border-radius: 6px;
+            margin-bottom: 10px; border-left: 4px solid #2e7d32;
+        }
+        .note-header, .cart-item-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 6px;
+        }
+        .note-plant, .cart-item-name {
+            font-weight: 600; color: #1b5e20; font-size: 14px; flex: 1;
+        }
+        .note-details, .cart-item-meta { font-size: 12px; color: #666; line-height: 1.5; }
+        .btn-delete {
+            background: #d32f2f; color: white; border: none;
+            padding: 6px 12px; border-radius: 4px; font-size: 12px;
+            font-weight: 600; cursor: pointer;
+        }
+
+        /* Aantal-controls in winkelmand */
+        .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+        .qty-btn {
+            background: #e8f5e9; color: #2e7d32; border: none;
+            border-radius: 4px; width: 28px; height: 28px; font-size: 16px;
+            font-weight: 700; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .qty-btn:active { background: #c8e6c9; }
+        .qty-display { font-weight: 700; font-size: 15px; min-width: 28px; text-align: center; }
+
+        /* Totaalbalk */
+        .cart-totaal {
+            background: #2e7d32; color: white; border-radius: 8px;
+            padding: 14px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 700;
+        }
+        .cart-totaal-label { font-size: 13px; opacity: 0.9; }
+        .cart-totaal-sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+        .cart-totaal-bedrag { font-size: 22px; }
+
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white; margin: 10% auto;
+            padding: 20px; border-radius: 12px; width: 90%; max-width: 400px;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee;
+        }
+        .modal-header h3 { margin: 0; color: #1b5e20; font-size: 16px; }
+        .close-modal { font-size: 24px; font-weight: bold; color: #999; cursor: pointer; border: none; background: none; }
+        .modal-field { margin-bottom: 12px; }
+        .modal-field label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .modal-field input, .modal-field textarea {
+            width: 100%; padding: 10px; border: 2px solid #ddd;
+            border-radius: 6px; font-size: 14px;
+        }
+        .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-secondary { background: #757575; }
+        
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌿 Voorraadlijst Heutinck</h1>
+            <p>Mobiele versie · <span id="product-count-header"></span></p>
+            <div class="lijst-datum" id="lijst-datum">📅 22-05-2026</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('voorraad', this)">Heutinck</button>
+            <button class="tab" id="tab-mand" onclick="switchTab('mand', this)">🛒 <span id="mand-count"></span></button>
+            <button class="tab" onclick="switchTab('notities', this)">Notities <span id="notes-count"></span></button>
+            <button class="tab tab-settings" onclick="switchTab('upload', this)">⚙️</button>
+        </div>
+
+        <!-- Voorraad tab -->
+        <div id="voorraad-tab" class="tab-content active">
+            <div style="position:relative;margin-bottom:15px;">
+                <button id="clear-search" onclick="clearSearch()" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;color:#d32f2f;cursor:pointer;line-height:1;">×</button>
+                <input type="text" class="search-box" id="search-box" placeholder="🔍 Zoek plant..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                    onkeydown="if(event.key==='Enter') event.preventDefault()"
+                    oninput="renderProducts(this.value); document.getElementById('clear-search').style.display=this.value?'block':'none'"
+                    style="margin-bottom:0;padding-right:16px;padding-left:36px;">
+            </div>
+            <div id="products-table" class="products-table"></div>
+        </div>
+
+        <!-- Winkelmand tab -->
+        <div id="mand-tab" class="tab-content">
+            <div id="cart-totaal-bar" style="display:none;" class="cart-totaal">
+                <div>
+                    <div class="cart-totaal-label">Totaal winkelmand</div>
+                    <div class="cart-totaal-sub" id="cart-totaal-sub"></div>
+                </div>
+                <div class="cart-totaal-bedrag" id="cart-totaal-bedrag">€0,00</div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px;">
+                <button onclick="exportMand()" style="background:#e8f5e9;color:#2e7d32;border:none;padding:6px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">📋 Exporteer</button>
+                <button class="btn-delete" onclick="clearMand()">Leeg maken</button>
+            </div>
+            <div id="cart-list"></div>
+        </div>
+
+        <!-- Notities tab -->
+        <div id="notities-tab" class="tab-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                <h2 style="font-size:18px;">Klant Notities</h2>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="openNoteModalVrij()" style="background:#2e7d32;color:white;border:none;padding:6px 12px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">+ Notitie</button>
+                    <button class="btn-delete" onclick="clearAllNotes()">Alles legen</button>
+                </div>
+            </div>
+            <div id="notes-list"></div>
+        </div>
+
+        <!-- Instellingen tab -->
+        <div id="upload-tab" class="tab-content">
+            <div class="upload-section">
+                <h2 style="font-size:16px;margin-bottom:12px;color:#2e7d32;">📤 Voorraadlijst uploaden</h2>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">De huidige voorraad (650 planten, 22-05-2026) is al ingebakken. Upload een nieuwe Excel om bij te werken.</p>
+                <div class="upload-area">
+                    <div style="font-size:36px;margin-bottom:10px;">📁</div>
+                    <button class="btn" onclick="document.getElementById('file-input').click()">Nieuwe Excel uploaden</button>
+                    <input type="file" id="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+            <div class="upload-section" style="margin-top:15px;">
+                <h2 style="font-size:16px;margin-bottom:12px;color:#2e7d32;">💾 Backup notities</h2>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button onclick="exportBackup()" class="btn">Exporteer backup (json)</button>
+                    <button onclick="document.getElementById('import-input').click()" class="btn">Importeer backup (json)</button>
+                    <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importBackup(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-app bevestigingsdialoog -->
+    <div id="confirm-dialog" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);">
+        <div style="background:white;margin:30% auto;padding:24px;border-radius:12px;width:88%;max-width:360px;box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+            <div id="confirm-icon" style="font-size:36px;text-align:center;margin-bottom:12px;"></div>
+            <p id="confirm-message" style="text-align:center;font-size:16px;font-weight:600;margin-bottom:6px;color:#333;"></p>
+            <p id="confirm-sub" style="text-align:center;font-size:13px;color:#888;margin-bottom:20px;"></p>
+            <div style="display:flex;gap:10px;">
+                <button id="confirm-cancel" onclick="closeConfirm()"
+                    style="flex:1;padding:12px;background:#f1f8f1;color:#555;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                    Annuleren
+                </button>
+                <button id="confirm-ok"
+                    style="flex:1;padding:12px;background:#d32f2f;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                    Verwijderen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-app melding (info/waarschuwing) -->
+    <div id="info-dialog" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);">
+        <div style="background:white;margin:30% auto;padding:24px;border-radius:12px;width:88%;max-width:360px;box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+            <div id="info-icon" style="font-size:36px;text-align:center;margin-bottom:12px;"></div>
+            <p id="info-message" style="text-align:center;font-size:15px;font-weight:600;color:#333;margin-bottom:20px;"></p>
+            <button onclick="closeInfo()"
+                style="width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Import resultaat dialoog -->
+    <div id="import-dialog" style="display:none;position:fixed;z-index:3000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);">
+        <div style="background:white;margin:8% auto;padding:24px;border-radius:12px;width:90%;max-width:420px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-height:80vh;display:flex;flex-direction:column;">
+            <div style="font-size:32px;text-align:center;margin-bottom:8px;">📊</div>
+            <h3 style="text-align:center;color:#2e7d32;margin-bottom:16px;font-size:17px;" id="import-title"></h3>
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                <div style="flex:1;background:#e8f5e9;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#2e7d32;" id="import-total"></div>
+                    <div style="font-size:11px;color:#666;margin-top:2px;">totaal soorten</div>
+                </div>
+                <div style="flex:1;background:#e8f5e9;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#2e7d32;" id="import-new-count"></div>
+                    <div style="font-size:11px;color:#666;margin-top:2px;">nieuw t.o.v. vorige</div>
+                </div>
+                <div style="flex:1;background:#fff3e0;border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:24px;font-weight:700;color:#e65100;" id="import-removed-count"></div>
+                    <div style="font-size:11px;color:#666;margin-top:2px;">niet meer in lijst</div>
+                </div>
+            </div>
+            <div id="import-new-list" style="overflow-y:auto;flex:1;margin-bottom:14px;"></div>
+            <button onclick="closeImportDialog()"
+                style="width:100%;padding:12px;background:#2e7d32;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                Naar voorraadlijst →
+            </button>
+        </div>
+    </div>
+
+    <!-- Notitie Modal -->
+    <div id="note-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-plant-name"></h3>
+                <button class="close-modal" onclick="closeNoteModal()">&times;</button>
+            </div>
+            <div class="modal-field" id="modal-vrije-naam-field" style="display:none;">
+                <label>Plantnaam:</label>
+                <input type="text" id="modal-vrije-naam" placeholder="Naam van de plant..."
+                    autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false">
+            </div>
+            <div class="modal-field">
+                <label>Aantal:</label>
+                <input type="number" id="note-aantal" min="1" value="1" onfocus="this.select()">
+            </div>
+            <div class="modal-field">
+                <label>Voor wie:</label>
+                <input type="text" id="note-voor-wie" placeholder="Naam klant">
+            </div>
+            <div class="modal-field">
+                <label>Contact:</label>
+                <input type="text" id="note-contact" placeholder="Telefoon/Email">
+            </div>
+            <div class="modal-field">
+                <label>Opmerkingen:</label>
+                <textarea id="note-opmerkingen" rows="3" placeholder="Extra notities..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeNoteModal()" style="flex:1;">Annuleren</button>
+                <button class="btn" id="modal-btn-notitie" onclick="saveNote()" style="flex:1;display:none;">📝 In notities</button>
+                <button class="btn" id="modal-btn-mand" onclick="saveToCart()" style="flex:1;">🛒 In winkelmand</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        const BUILTIN_PRODUCTS = []; // Ingebakken lijst verwijderd — gebruik Excel upload
+
+        let currentProducts = [];
+        let notes = [];
+        let cart = [];
+        let selectedProduct = null;
+        let usingBuiltin = false;
+
+        // ── Datum helpers ───────────────────────────────────────────────
+        function extractDateFromFilename(filename) {
+            const m = filename.match(/(\d{2})-(\d{2})-(\d{4})/);
+            if (m) return { raw: `${m[1]}-${m[2]}-${m[3]}` };
+            const m2 = filename.match(/(\d{4})-(\d{2})(\d{2})/);
+            if (m2) return { raw: `${m2[3]}-${m2[2]}-${m2[1]}` };
+            return null;
+        }
+
+        function updateHeaderDatum(dateStr) {
+            const el = document.getElementById('lijst-datum');
+            if (!dateStr) { el.textContent = ''; return; }
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const listDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                const diffDays = Math.floor((new Date() - listDate) / 86400000);
+                el.textContent = `📅 Lijst: ${dateStr}`;
+                el.classList.toggle('oud', diffDays > 14);
+                if (diffDays > 14) el.title = `Let op: ${diffDays} dagen oud`;
+            } else {
+                el.textContent = `📅 ${dateStr}`;
+            }
+        }
+
+        // ── Opslaan / laden ─────────────────────────────────────────────
+        function saveData() {
+            // Producten compact opslaan als array van arrays [naam, qty, pot, prijs]
+            if (currentProducts.length > 0) {
+                const compact = currentProducts.map(p => [p.name, p.quantity, p.potSize, p.price, p.opm || '']);
+                try { localStorage.setItem('heutinckProducts', JSON.stringify(compact)); } catch(e) {}
+            }
+            try { localStorage.setItem('heutinckNotes', JSON.stringify(notes)); } catch(e) {}
+            try { localStorage.setItem('heutinckCart', JSON.stringify(cart)); } catch(e) {}
+        }
+
+        function loadData() {
+            const savedDatum    = localStorage.getItem('heutinckLijstDatum');
+            const savedProducts = localStorage.getItem('heutinckProducts');
+            const savedNotes    = localStorage.getItem('heutinckNotes');
+            const savedCart     = localStorage.getItem('heutinckCart');
+
+            if (savedDatum) updateHeaderDatum(savedDatum);
+
+            if (savedProducts) {
+                const compact = JSON.parse(savedProducts);
+                // Ondersteun zowel compact [naam,qty,pot,prijs] als oud object-formaat
+                currentProducts = compact.map(p => Array.isArray(p)
+                    ? { name: p[0], quantity: p[1], potSize: p[2], price: p[3], opm: p[4] || '' }
+                    : p
+                );
+            }
+
+            document.getElementById('product-count-header').textContent = currentProducts.length > 0 ? `${currentProducts.length} soorten` : 'Upload een Excel-lijst';
+            renderProducts();
+
+            if (savedNotes) { notes = JSON.parse(savedNotes); renderNotes(); }
+            if (savedCart)  { cart  = JSON.parse(savedCart);  renderCart(); }
+        }
+
+        function showToast(msg, bg = '#2e7d32') {
+            const el = document.createElement('div');
+            el.style.cssText = `position:fixed;top:10px;left:50%;transform:translateX(-50%);background:${bg};color:white;padding:10px 20px;border-radius:8px;z-index:9999;font-size:14px;`;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2500);
+        }
+
+        // ── Excel upload ────────────────────────────────────────────────
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const dateInfo = extractDateFromFilename(file.name);
+            if (dateInfo) {
+                localStorage.setItem('heutinckLijstDatum', dateInfo.raw);
+                updateHeaderDatum(dateInfo.raw);
+            }
+            const reader = new FileReader();
+            reader.onerror = function() {
+                showInfo('Kon het bestand niet lezen.', '⚠️');
+            };
+            reader.onload = function(e) {
+                try {
+                    if (typeof XLSX === 'undefined') {
+                        showInfo('Excel-bibliotheek nog niet geladen. Probeer opnieuw.', '⚠️');
+                        return;
+                    }
+                    const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                    const jsonData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+                    if (!jsonData || jsonData.length < 2) {
+                        showInfo('Het bestand lijkt leeg of heeft een onbekende opmaak.', '⚠️');
+                        return;
+                    }
+                    processExcelData(jsonData);
+                } catch(err) {
+                    showInfo('Fout bij verwerken: ' + err.message, '⚠️');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function processExcelData(data) {
+            // Heutinck: Plantnaam(0), Verkoopbaar(1), Potmaat(2), Prijs(3), Opm(4)
+            const seen = new Set();
+            const products = data.slice(1).map(row => ({
+                name: row[0] ? String(row[0]).trim() : null,
+                quantity: row[1] !== undefined ? String(row[1]) : '',
+                potSize: row[2] ? String(row[2]) : '',
+                price: parseFloat(row[3]) || 0,
+                opm: row[4] ? String(row[4]).trim() : '',
+            })).filter(p => p.name && !seen.has(p.name.toLowerCase()) && seen.add(p.name.toLowerCase()));
+
+            // Vergelijk met vorige import
+            // Geheugen: max 2 lijsten — 'huidig' schuift naar 'vorig', oudere wordt verwijderd
+            const savedCurrent = localStorage.getItem('heutinckCurrentNames');
+            const prevNames = savedCurrent ? new Set(JSON.parse(savedCurrent)) : new Set();
+            const newNames   = new Set(products.map(p => p.name.toLowerCase()));
+            const nieuweItems     = products.filter(p => !prevNames.has(p.name.toLowerCase()));
+            const verwijderdItems = [...prevNames].filter(n => !newNames.has(n)).map(n => ({name: n}));
+            // Huidige wordt vorige, nieuwe wordt huidige — oude 'vorige' vervalt automatisch
+            try {
+                localStorage.removeItem('heutinckPrevNames'); // opruimen oude sleutel
+                localStorage.setItem('heutinckCurrentNames', JSON.stringify([...newNames]));
+            } catch(e) {}
+
+            currentProducts = products;
+            usingBuiltin = false;
+            // Sla alleen datum op, niet de lijst zelf (te groot voor localStorage)
+            document.getElementById('product-count-header').textContent = `${products.length} soorten`;
+            renderProducts();
+
+            // Toon import resultaat dialoog
+            showImportDialog(products.length, nieuweItems, verwijderdItems);
+        }
+
+        function showImportDialog(total, nieuw, verwijderd) {
+            document.getElementById('import-title').textContent = 'Voorraadlijst geïmporteerd';
+            document.getElementById('import-total').textContent = total;
+            document.getElementById('import-new-count').textContent = nieuw.length;
+            document.getElementById('import-removed-count').textContent = verwijderd.length;
+
+            let html = '';
+            if (nieuw.length > 0) {
+                html += `<div style="margin-bottom:10px;">
+                    <div style="font-weight:700;font-size:13px;color:#2e7d32;margin-bottom:6px;">🌱 Nieuwe planten (${nieuw.length}):</div>
+                    ${nieuw.map(p => `<div style="font-size:12px;padding:4px 8px;background:#f1f8f1;border-radius:4px;margin-bottom:3px;">
+                        <strong>${p.name}</strong> <span style="color:#888;">${p.potSize} · €${p.price.toFixed(2).replace('.',',')}</span>
+                    </div>`).join('')}
+                </div>`;
+            }
+            if (verwijderd.length > 0) {
+                html += `<div>
+                    <div style="font-weight:700;font-size:13px;color:#e65100;margin-bottom:6px;">❌ Niet meer in lijst (${verwijderd.length}):</div>
+                    ${verwijderd.map(p => `<div style="font-size:12px;padding:4px 8px;background:#fff8f1;border-radius:4px;margin-bottom:3px;">
+                        <strong>${p.name}</strong>
+                    </div>`).join('')}
+                </div>`;
+            }
+            if (nieuw.length === 0 && verwijderd.length === 0) {
+                html = '<div style="text-align:center;color:#888;font-size:13px;padding:10px;">Geen wijzigingen t.o.v. de vorige lijst.</div>';
+            }
+
+            document.getElementById('import-new-list').innerHTML = html;
+            const dlg = document.getElementById('import-dialog');
+            dlg.style.display = 'block';
+            // Scroll lijst terug naar boven
+            document.getElementById('import-new-list').scrollTop = 0;
+        }
+
+        function closeImportDialog() {
+            document.getElementById('import-dialog').style.display = 'none';
+            switchTab('voorraad', document.querySelector('[onclick*="voorraad"]'));
+        }
+
+        // ── Voorraad tabel ──────────────────────────────────────────────
+        function renderProducts(searchTerm = '') {
+            const container = document.getElementById('products-table');
+            if (!container) return;
+            let filtered = currentProducts;
+            if (searchTerm) {
+                const terms = searchTerm.toLowerCase().trim().split(/\s+/).filter(Boolean);
+                filtered = filtered.filter(p => {
+                    const words = p.name.toLowerCase().split(/\s+/);
+                    return terms.every(t => words.some(w => w.replace(/['"]/g, '').startsWith(t.replace(/['"]/g, ''))));
+                });
+            }
+            if (filtered.length === 0 && currentProducts.length === 0) {
+                container.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">📂</div>
+                    <p style="font-weight:600;margin-bottom:8px;">Nog geen voorraadlijst geladen</p>
+                    <p style="font-size:13px;color:#aaa;">Ga naar ⚙️ om een Excel-bestand te uploaden</p>
+                </div>`;
+                return;
+            }
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Geen producten gevonden</p></div>';
+                return;
+            }
+            container.innerHTML = `
+                <table>
+                    <thead><tr>
+                        <th style="width:40%;">Plant</th>
+                        <th style="text-align:center;width:44px;">Voorr.</th>
+                        <th style="width:36px;">Pot</th>
+                        <th style="text-align:center;width:26px;">Opm</th>
+                        <th style="text-align:center;width:34px;">Bestel</th>
+                        <th style="text-align:right;width:52px;">Prijs</th>
+                    </tr></thead>
+                    <tbody>
+                        ${filtered.map(p => `
+                            <tr onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">
+                                <td style="font-size:12px;"><strong>${p.name}</strong></td>
+                                <td style="text-align:center;font-size:12px;">${p.quantity || '-'}</td>
+                                <td style="font-size:11px;">${p.potSize}</td>
+                                <td style="font-size:11px;color:#555;text-align:center;width:26px;">${p.opm || ''}</td>
+                                <td style="padding:6px 4px;" onclick="event.stopPropagation()">
+                                    <button class="btn-bestel" onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">+</button>
+                                </td>
+                                <td style="text-align:right;white-space:nowrap;font-size:12px;"><strong>€${p.price.toFixed(2).replace('.', ',')}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-box');
+            const btn = document.getElementById('clear-search');
+            input.value = '';
+            btn.style.display = 'none';
+            renderProducts('');
+            input.focus();
+        }
+
+        // ── Winkelmand ──────────────────────────────────────────────────
+        function addToCart(plantName) {
+            const product = currentProducts.find(p => p.name === plantName);
+            if (!product) return;
+            const existing = cart.find(c => c.name === plantName);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name: product.name, potSize: product.potSize, price: product.price, qty: 1, voorWie: '' });
+            }
+            saveData();
+            renderCart();
+            updateMandTab();
+            showToast(`+ ${product.name}`, '#2e7d32');
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) cart.splice(index, 1);
+            saveData();
+            renderCart();
+            updateMandTab();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveData();
+            renderCart();
+            updateMandTab();
+        }
+
+        function editCartItem(index) {
+            const item = cart[index];
+            selectedProduct = { name: item.name, potSize: item.potSize, price: item.price, source: 'cart', cartIndex: index };
+            document.getElementById('modal-vrije-naam-field').style.display = 'none';
+            document.getElementById('modal-plant-name').textContent = item.name;
+            document.getElementById('note-aantal').value = item.qty;
+            document.getElementById('note-voor-wie').value = item.voorWie || '';
+            document.getElementById('note-contact').value = item.contact || '';
+            document.getElementById('note-opmerkingen').value = item.opmerking || '';
+            document.getElementById('modal-btn-notitie').style.display = 'none';
+            document.getElementById('modal-btn-mand').style.display = 'flex';
+            document.getElementById('note-modal').style.display = 'block';
+        }
+
+        function clearMand() {
+            if (cart.length === 0) return;
+            showConfirm('Winkelmand leegmaken?', 'Alle items worden verwijderd.', 'Leeg maken', '#d32f2f', () => {
+                cart = []; saveData(); renderCart(); updateMandTab();
+            });
+        }
+
+        function updateMandTab() {
+            const totalQty = cart.reduce((s, c) => s + c.qty, 0);
+            document.getElementById('mand-count').textContent = totalQty > 0 ? `(${totalQty})` : '';
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-list');
+            const totaalBar = document.getElementById('cart-totaal-bar');
+            if (!container) return;
+
+            if (cart.length === 0) {
+                totaalBar.style.display = 'none';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🛒</div><p>Winkelmand is leeg</p><p style="font-size:12px;margin-top:8px;">Tik op + bij een plant om te bestellen</p></div>';
+                return;
+            }
+
+            const totalBedrag = cart.reduce((s, c) => s + c.price * c.qty, 0);
+            const totalQty    = cart.reduce((s, c) => s + c.qty, 0);
+
+            totaalBar.style.display = 'flex';
+            document.getElementById('cart-totaal-sub').textContent = `${totalQty} stuks, ${cart.length} soort${cart.length !== 1 ? 'en' : ''}`;
+            document.getElementById('cart-totaal-bedrag').textContent = '€' + totalBedrag.toFixed(2).replace('.', ',');
+
+            container.innerHTML = cart.map((item, i) => `
+                <div class="cart-item">
+                    <div class="cart-item-header">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <button onclick="editCartItem(${i})" title="Bewerken"
+                                style="background:#e8f5e9;color:#2e7d32;border:none;border-radius:4px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+                            <button class="btn-delete" onclick="removeFromCart(${i})" style="padding:4px 8px;">×</button>
+                        </div>
+                    </div>
+                    <div class="cart-item-meta">${item.potSize} · €${item.price.toFixed(2).replace('.', ',')} p/st · totaal <strong>€${(item.price * item.qty).toFixed(2).replace('.', ',')}</strong></div>
+                    ${item.voorWie ? `<div style="font-size:12px;color:#555;margin-top:4px;">👤 ${item.voorWie}</div>` : ''}
+                    ${item.contact ? `<div style="font-size:12px;color:#555;">📞 ${item.contact}</div>` : ''}
+                    ${item.opmerking ? `<div style="font-size:12px;color:#555;font-style:italic;">${item.opmerking}</div>` : ''}
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+                        <span class="qty-display">${item.qty}</span>
+                        <button class="qty-btn" onclick="changeQty(${i}, +1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function exportMand() {
+            if (cart.length === 0) { showInfo('Winkelmand is leeg.', '🛒'); return; }
+            const datum = new Date().toLocaleDateString('nl-NL');
+            const totaal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+            let tekst = `Bestelling Heutinck — ${datum}\n`;
+            tekst += '═'.repeat(40) + '\n';
+            cart.forEach(item => {
+                tekst += `${String(item.qty).padStart(3)}x  ${item.name}\n`;
+                tekst += `       ${item.potSize}  ·  €${item.price.toFixed(2).replace('.',',')} p/st  =  €${(item.price*item.qty).toFixed(2).replace('.',',')}\n`;
+                if (item.voorWie)   tekst += `       Voor wie: ${item.voorWie}\n`;
+                if (item.contact)   tekst += `       Contact:  ${item.contact}\n`;
+                if (item.opmerking) tekst += `       Notitie:  ${item.opmerking}\n`;
+                const prod = currentProducts.find(p => p.name === item.name);
+                if (prod && prod.opm) tekst += `       Opm:      ${prod.opm}\n`;
+            });
+            tekst += '─'.repeat(40) + '\n';
+            tekst += `TOTAAL: €${totaal.toFixed(2).replace('.',',')}\n`;
+            const blob = new Blob([tekst], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `bestelling-heutinck-${datum.replace(/\//g,'-')}.txt`; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ── Notities ────────────────────────────────────────────────────
+        function openNoteModalVrij() {
+            selectedProduct = { name: '', quantity: null, potSize: null, price: 0, source: 'vrij' };
+            document.getElementById('modal-plant-name').textContent = 'Nieuwe notitie';
+            document.getElementById('modal-vrije-naam-field').style.display = 'block';
+            document.getElementById('modal-vrije-naam').value = '';
+            document.getElementById('note-aantal').value = 1;
+            document.getElementById('note-voor-wie').value = '';
+            document.getElementById('note-contact').value = '';
+            document.getElementById('note-opmerkingen').value = '';
+            document.getElementById('modal-btn-notitie').style.display = 'flex';
+            document.getElementById('modal-btn-mand').style.display = 'none';
+            document.getElementById('note-modal').style.display = 'block';
+        }
+
+        function openNoteModal(plantName) {
+            selectedProduct = currentProducts.find(p => p.name === plantName);
+            if (!selectedProduct) return;
+            document.getElementById('modal-vrije-naam-field').style.display = 'none';
+            document.getElementById('modal-plant-name').textContent = selectedProduct.name;
+            document.getElementById('note-aantal').value = 1;
+            document.getElementById('note-voor-wie').value = '';
+            document.getElementById('note-contact').value = '';
+            document.getElementById('note-opmerkingen').value = '';
+            document.getElementById('modal-btn-notitie').style.display = 'none';
+            document.getElementById('modal-btn-mand').style.display = 'flex';
+            document.getElementById('note-modal').style.display = 'block';
+        }
+
+        function closeNoteModal() {
+            document.getElementById('note-modal').style.display = 'none';
+            selectedProduct = null;
+        }
+
+        function saveNote() {
+            if (!selectedProduct) return;
+
+            // Bestaande notitie bewerken
+            if (selectedProduct.source === 'note') {
+                const note = notes[selectedProduct.noteIndex];
+                if (note) {
+                    note.aantal      = parseInt(document.getElementById('note-aantal').value) || 1;
+                    note.voorWie     = document.getElementById('note-voor-wie').value.trim();
+                    note.contact     = document.getElementById('note-contact').value.trim();
+                    note.opmerkingen = document.getElementById('note-opmerkingen').value.trim();
+                }
+                saveData();
+                renderNotes();
+                closeNoteModal();
+                return;
+            }
+
+            // Nieuwe notitie toevoegen
+            const plantNaam = selectedProduct.source === 'vrij'
+                ? (document.getElementById('modal-vrije-naam').value.trim() || '(geen naam)')
+                : selectedProduct.name;
+            notes.push({
+                plant: plantNaam,
+                voorraad: selectedProduct.quantity,
+                potSize: selectedProduct.potSize,
+                price: selectedProduct.price,
+                aantal: parseInt(document.getElementById('note-aantal').value) || 1,
+                voorWie: document.getElementById('note-voor-wie').value.trim(),
+                contact: document.getElementById('note-contact').value.trim(),
+                opmerkingen: document.getElementById('note-opmerkingen').value.trim(),
+                timestamp: new Date().toISOString()
+            });
+            saveData();
+            renderNotes();
+            closeNoteModal();
+            switchTab('notities', document.querySelector('[onclick*="notities"]'));
+        }
+
+        function saveToCart() {
+            if (!selectedProduct) return;
+            const aantal    = parseInt(document.getElementById('note-aantal').value) || 1;
+            const voorWie   = document.getElementById('note-voor-wie').value.trim();
+            const contact   = document.getElementById('note-contact').value.trim();
+            const opmerking = document.getElementById('note-opmerkingen').value.trim();
+
+            // Bewerken van bestaand winkelmand-item
+            if (selectedProduct.source === 'cart') {
+                const item = cart[selectedProduct.cartIndex];
+                if (item) {
+                    item.qty      = aantal;
+                    item.voorWie  = voorWie;
+                    item.contact  = contact;
+                    item.opmerking = opmerking;
+                }
+                saveData();
+                renderCart();
+                closeNoteModal();
+                return;
+            }
+
+            // Nieuw item toevoegen
+            const plantNaam = selectedProduct.source === 'vrij'
+                ? (document.getElementById('modal-vrije-naam').value.trim() || '(geen naam)')
+                : selectedProduct.name;
+
+            const existing = cart.find(c => c.name === plantNaam);
+            if (existing) {
+                existing.qty += aantal;
+                if (voorWie)   existing.voorWie   = voorWie;
+                if (contact)   existing.contact   = contact;
+                if (opmerking) existing.opmerking = opmerking;
+            } else {
+                cart.push({
+                    name: plantNaam,
+                    potSize: selectedProduct.potSize || '',
+                    price: selectedProduct.price || 0,
+                    qty: aantal,
+                    voorWie, contact, opmerking
+                });
+            }
+            saveData();
+            renderCart();
+            updateMandTab();
+            closeNoteModal();
+            switchTab('mand', document.querySelector('[onclick*=\'mand\']'));
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notes-list');
+            const count = document.getElementById('notes-count');
+            if (!container || !count) return;
+            count.textContent = notes.length > 0 ? `(${notes.length})` : '';
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>Nog geen notities</p></div>';
+                return;
+            }
+            container.innerHTML = notes.map((note, i) => `
+                <div class="note-item">
+                    <div class="note-header">
+                        <div class="note-plant">${note.plant}</div>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <button onclick="editNote(${i})" title="Bewerken"
+                                style="background:#e8f5e9;color:#2e7d32;border:none;border-radius:4px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+                            <button class="btn-delete" onclick="deleteNote(${i})">×</button>
+                        </div>
+                    </div>
+                    <div class="note-details">
+                        <div><strong>Aantal:</strong> ${note.aantal} | <strong>Voorraad:</strong> ${note.voorraad || '-'}</div>
+                        ${note.voorWie ? `<div><strong>Voor wie:</strong> ${note.voorWie}</div>` : ''}
+                        ${note.contact ? `<div><strong>Contact:</strong> ${note.contact}</div>` : ''}
+                        ${note.opmerkingen ? `<div><strong>Notities:</strong> ${note.opmerkingen}</div>` : ''}
+                        <div style="font-size:11px;color:#999;margin-top:5px;">${new Date(note.timestamp).toLocaleString('nl-NL')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteNote(index) {
+            showConfirm('Notitie verwijderen?', '', 'Verwijderen', '#d32f2f', () => {
+                notes.splice(index, 1); saveData(); renderNotes();
+            });
+        }
+
+        function editNote(index) {
+            const note = notes[index];
+            selectedProduct = { name: note.plant, quantity: note.voorraad, potSize: note.potSize, price: note.price, source: 'note', noteIndex: index };
+            document.getElementById('modal-vrije-naam-field').style.display = 'none';
+            document.getElementById('modal-plant-name').textContent = note.plant;
+            document.getElementById('note-aantal').value = note.aantal || 1;
+            document.getElementById('note-voor-wie').value = note.voorWie || '';
+            document.getElementById('note-contact').value = note.contact || '';
+            document.getElementById('note-opmerkingen').value = note.opmerkingen || '';
+            document.getElementById('modal-btn-notitie').style.display = 'flex';
+            document.getElementById('modal-btn-mand').style.display = 'none';
+            document.getElementById('note-modal').style.display = 'block';
+        }
+
+        function clearAllNotes() {
+            showConfirm('Alle notities verwijderen?', 'Dit kan niet ongedaan worden gemaakt.', 'Alles verwijderen', '#d32f2f', () => {
+                notes = []; saveData(); renderNotes();
+            });
+        }
+
+        // ── Backup ──────────────────────────────────────────────────────
+        function exportBackup() {
+            if (notes.length === 0 && cart.length === 0 && currentProducts.length === 0) {
+                showInfo('Niets om te exporteren.', '📝'); return;
+            }
+            const backup = {
+                versie: 2,
+                exportDatum: new Date().toISOString(),
+                lijstDatum: localStorage.getItem('heutinckLijstDatum') || '',
+                producten: currentProducts.map(p => [p.name, p.quantity, p.potSize, p.price]),
+                vorigeNamen: (() => { try { return JSON.parse(localStorage.getItem('heutinckCurrentNames') || '[]'); } catch(e) { return []; } })(),
+                winkelmand: cart,
+                notities: notes,
+            };
+            const datum = new Date().toLocaleDateString('nl-NL').replace(/\//g, '-');
+            const blob = new Blob([JSON.stringify(backup, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `backup-heutinck-${datum}.json`; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    let msg = [];
+
+                    // Notities
+                    if (imported.notities && imported.notities.length > 0) {
+                        notes = imported.notities;
+                        msg.push(`${notes.length} notities`);
+                    }
+
+                    // Winkelmand
+                    if (imported.winkelmand && imported.winkelmand.length > 0) {
+                        cart = imported.winkelmand;
+                        msg.push(`${cart.length} items in winkelmand`);
+                    }
+
+                    // Voorraadlijst (versie 2: compact array, versie 1: had geen producten)
+                    if (imported.producten && imported.producten.length > 0) {
+                        currentProducts = imported.producten.map(p => Array.isArray(p)
+                            ? { name: p[0], quantity: p[1], potSize: p[2], price: p[3] }
+                            : p
+                        );
+                        msg.push(`${currentProducts.length} planten`);
+                    }
+
+                    // Vorige namenlijst voor vergelijking
+                    if (imported.vorigeNamen && imported.vorigeNamen.length > 0) {
+                        try { localStorage.setItem('heutinckCurrentNames', JSON.stringify(imported.vorigeNamen)); } catch(e) {}
+                    }
+
+                    // Lijstdatum
+                    if (imported.lijstDatum) {
+                        localStorage.setItem('heutinckLijstDatum', imported.lijstDatum);
+                        updateHeaderDatum(imported.lijstDatum);
+                    }
+
+                    saveData();
+                    renderProducts();
+                    renderNotes();
+                    renderCart();
+                    updateMandTab();
+                    document.getElementById('product-count-header').textContent = currentProducts.length > 0 ? `${currentProducts.length} soorten` : 'Upload een Excel-lijst';
+
+                    showToast(`✓ Hersteld: ${msg.join(', ')}`);
+                } catch(err) { showInfo('Ongeldig bestand: ' + err.message, '⚠️'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ── Navigatie ───────────────────────────────────────────────────
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        // ── In-app dialogen ─────────────────────────────────────────────
+        let _confirmCallback = null;
+
+        function showConfirm(message, sub, okLabel, okColor, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-sub').textContent = sub || '';
+            document.getElementById('confirm-icon').textContent = okColor === '#d32f2f' ? '🗑️' : '⚠️';
+            const okBtn = document.getElementById('confirm-ok');
+            okBtn.textContent = okLabel || 'Bevestigen';
+            okBtn.style.background = okColor || '#d32f2f';
+            _confirmCallback = callback;
+            document.getElementById('confirm-dialog').style.display = 'block';
+        }
+
+        function closeConfirm(confirmed) {
+            document.getElementById('confirm-dialog').style.display = 'none';
+            if (confirmed && _confirmCallback) _confirmCallback();
+            _confirmCallback = null;
+        }
+
+        function showInfo(message, icon) {
+            document.getElementById('info-icon').textContent = icon || 'ℹ️';
+            document.getElementById('info-message').textContent = message;
+            document.getElementById('info-dialog').style.display = 'block';
+        }
+
+        function closeInfo() {
+            document.getElementById('info-dialog').style.display = 'none';
+        }
+
+        document.getElementById('confirm-ok').addEventListener('click', () => closeConfirm(true));
+
+        document.addEventListener('visibilitychange', () => { if (document.hidden) saveData(); });
+        window.addEventListener('beforeunload', saveData);
+        window.addEventListener('blur', saveData);
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('note-modal')) closeNoteModal();
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
