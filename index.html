@@ -48,6 +48,7 @@
             text-align: center;
         }
         .tab.active { background: #2e7d32; color: white; border-color: #2e7d32; }
+        #tab-mand.active { background: #2e7d32 !important; color: white !important; border-color: #2e7d32 !important; }
         .tab-settings { flex: 0 0 auto; padding: 10px 14px; font-size: 16px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -181,7 +182,13 @@
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('voorraad', this)">Heutinck</button>
-            <button class="tab" id="tab-mand" onclick="switchTab('mand', this)">🛒 <span id="mand-count"></span></button>
+            <button class="tab" id="tab-mand" onclick="switchTab('mand', this)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span id="mand-count" style="font-size:13px;"></span>
+            </button>
             <button class="tab" onclick="switchTab('notities', this)">Notities <span id="notes-count"></span></button>
             <button class="tab tab-settings" onclick="switchTab('upload', this)">⚙️</button>
         </div>
