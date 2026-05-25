@@ -562,16 +562,16 @@
                     <thead><tr>
                         <th style="width:44%;">Plant</th>
                         <th style="text-align:center;width:44px;">Voorr.</th>
-                        <th style="text-align:center;width:26px;">Opm</th>
+                        <th style="text-align:center;width:18px;">Opm</th>
                         <th style="text-align:center;width:34px;">Bestel</th>
-                        <th style="text-align:right;width:52px;">Prijs</th>
+                        <th style="text-align:right;width:46px;">Prijs</th>
                     </tr></thead>
                     <tbody>
                         ${filtered.map(p => `
                             <tr onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">
                                 <td style="font-size:12px;"><strong>${p.name}</strong></td>
                                 <td style="text-align:center;font-size:12px;">${p.quantity || '-'}</td>
-                                <td style="font-size:11px;color:#555;text-align:center;width:26px;">${p.opm || ''}</td>
+                                <td style="font-size:11px;color:#555;text-align:center;width:18px;">${p.opm || ''}</td>
                                 <td style="padding:6px 4px;" onclick="event.stopPropagation()">
                                     <button class="btn-bestel" onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">+</button>
                                 </td>
