@@ -560,21 +560,17 @@
             container.innerHTML = `
                 <table>
                     <thead><tr>
-                        <th style="width:38%;">Plant</th>
+                        <th style="width:52%;">Plant</th>
                         <th style="text-align:center;width:17%;">Voorr.</th>
                         <th style="text-align:center;width:8%;">Opm</th>
-                        <th style="text-align:center;width:13%;">Bestel</th>
-                        <th style="text-align:right;width:18%;">Prijs</th>
+                        <th style="text-align:right;width:23%;">Prijs</th>
                     </tr></thead>
                     <tbody>
                         ${filtered.map(p => `
                             <tr onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">
-                                <td style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong>${p.name}</strong></td>
+                                <td style="font-size:12px;word-break:break-word;"><strong>${p.name}</strong></td>
                                 <td style="text-align:center;font-size:12px;">${p.quantity || '-'}</td>
                                 <td style="font-size:11px;color:#555;text-align:center;">${p.opm || ''}</td>
-                                <td style="padding:6px 4px;" onclick="event.stopPropagation()">
-                                    <button class="btn-bestel" onclick="openNoteModal('${p.name.replace(/'/g, "\\'")}')">+</button>
-                                </td>
                                 <td style="text-align:right;white-space:nowrap;font-size:12px;"><strong>€${p.price.toFixed(2).replace('.', ',')}</strong></td>
                             </tr>
                         `).join('')}
